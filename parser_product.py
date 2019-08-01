@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 
+FILE_INPUT = 'input.txt'
+FILE_OUTPUT = 'output.txt'
+
 
 def parse_shop(line):
     product = {'shop': line[:line.find(':')]}
@@ -12,24 +15,41 @@ def parse_shop(line):
 
 
 if __name__ == "__main__":
-    FILE = 'input.txt'
+    # parse file
     df = pd.DataFrame()
-    with open(FILE, 'r') as f:
+    with open(FILE_INPUT, 'r') as f:
         for line in f:
             product = parse_shop(line)
             df = df.append(product, ignore_index=True)
     df = df.set_index('shop')
+    print(df)
+
     # find missing products
     product = df.isnull().sum(axis=0)
     product = product[product <= len(df)/2]
     product = product.iloc[np.lexsort([product.index, product.values])]
+    print(product)
 
     # find shops with missing products
     missing_product = product[product.values != 0]
     if len(missing_product):
-        for p in missing_product.index:
-            shops = df[p][df[p].isnull()].sort_index()
-            shops = shops.index.values
-            print(shops)
+        missing_product = product
+
+    if len(missing_product):
+        with open(FILE_OUTPUT, 'w') as f:
+            for product in missing_product.index:
+                shops = df[product][df[product].isnull()].sort_index()
+                shops = shops.index.values
+                print(shops)
+                if shops:
+                    f.write('{} - {} ({})'.format(product,
+                                                  missing_product[product],
+                                                  ', '.join(shops)))
+                else:
+                    f.write('{} - {}'.format(product,
+                                             missing_product[product]))
+                f.write('\n')
+
+
 
 
