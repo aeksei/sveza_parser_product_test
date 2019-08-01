@@ -22,13 +22,13 @@ if __name__ == "__main__":
             product = parse_shop(line)
             df = df.append(product, ignore_index=True)
     df = df.set_index('shop')
-    print(df)
+    # print(df)
 
     # find missing products
     product = df.isnull().sum(axis=0)
     product = product[product <= len(df)/2]
     product = product.iloc[np.lexsort([product.index, product.values])]
-    print(product)
+    # print(product)
 
     # find shops with missing products
     missing_product = product[product.values != 0]
@@ -40,8 +40,8 @@ if __name__ == "__main__":
             for product in missing_product.index:
                 shops = df[product][df[product].isnull()].sort_index()
                 shops = shops.index.values
-                print(shops)
-                if shops:
+                # print(shops)
+                if len(shops):
                     f.write('{} - {} ({})'.format(product,
                                                   missing_product[product],
                                                   ', '.join(shops)))
@@ -49,7 +49,3 @@ if __name__ == "__main__":
                     f.write('{} - {}'.format(product,
                                              missing_product[product]))
                 f.write('\n')
-
-
-
-
